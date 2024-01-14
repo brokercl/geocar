@@ -125,17 +125,17 @@ class LocateView extends GetView<LocateController> {
                       Visibility(
                         visible: controller.isHoraSaturada.value,
                         child: Text(
-                            'hora saturada: ${controller.isHoraSaturada.value}',
+                            'hora saturada: ${controller.inicioHoraSaturada.hour}:${controller.inicioHoraSaturada.minute == 0 ? '00' : '${controller.inicioHoraSaturada.minute}'} - ${controller.finHoraSaturada.hour}:${controller.finHoraSaturada.minute == 0 ? '00' : '${controller.finHoraSaturada.minute}'}',
                             style: TextStyle(color: horaSaturada)),
                       ),
                       Visibility(
                         visible: controller.isHoraPunta.value,
                         child: Text(
-                            'hora punta: ${controller.isHoraPunta.value}',
+                            'hora punta: ${controller.inicioHoraPunta.hour}:${controller.inicioHoraPunta.minute == 0 ? '00' : '${controller.inicioHoraPunta.minute}'} - ${controller.finHoraPunta.hour}:${controller.finHoraPunta.minute == 0 ? '00' : '${controller.finHoraPunta.minute}'}',
                             style: TextStyle(color: horaPunta)),
                       ),
                       Visibility(
-                        visible: !(controller.isHoraSaturada.value &&
+                        visible: !(controller.isHoraSaturada.value ||
                             controller.isHoraPunta.value),
                         child: Text('hora baja:',
                             style: TextStyle(color: horaBaja)),

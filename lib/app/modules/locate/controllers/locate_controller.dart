@@ -330,14 +330,15 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       List<List<DateTime>> rangesHorasSaturadas =
           convertToDateTimeList(horaSaturada);
       // Check if the current time is inside any of the ranges
-      isHoraSaturada.value = isTimeInRanges(now.value, rangesHorasSaturadas);
+      isHoraSaturada.value =
+          isTimeInRanges(now.value, rangesHorasSaturadas, 'saturada');
     }
 
     if (horaPunta.isNotEmpty) {
       // Convert the time ranges into a Dart List of DateTime ranges
       List<List<DateTime>> rangesHorasPuntas = convertToDateTimeList(horaPunta);
 
-      isHoraPunta.value = isTimeInRanges(now.value, rangesHorasPuntas);
+      isHoraPunta.value = isTimeInRanges(now.value, rangesHorasPuntas, 'punta');
     }
     // Print the result
   }
@@ -365,10 +366,18 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
         DateTime.now().day, hours, minutes);
   }
 
-  bool isTimeInRanges(DateTime time, List<List<DateTime>> ranges) {
+  bool isTimeInRanges(
+      DateTime time, List<List<DateTime>> ranges, String puntaOsaturado) {
     for (List<DateTime> range in ranges) {
       if (time.isAfter(range[0]) && time.isBefore(range[1])) {
-        print('time in range: $time');
+        if (puntaOsaturado == 'saturada') {
+          inicioHoraSaturada = range[0];
+          finHoraSaturada = range[1];
+        }
+        if (puntaOsaturado == 'punta') {
+          inicioHoraPunta = range[0];
+          finHoraPunta = range[1];
+        }
         return true;
       }
     }
@@ -405,6 +414,12 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
   RxDouble tariff = RxDouble(0.0);
   RxBool isHoraSaturada = RxBool(false);
   RxBool isHoraPunta = RxBool(false);
+
+  DateTime inicioHoraPunta = DateTime.now();
+  DateTime finHoraPunta = DateTime.now();
+
+  DateTime inicioHoraSaturada = DateTime.now();
+  DateTime finHoraSaturada = DateTime.now();
 
   @override
   void onInit() async {
