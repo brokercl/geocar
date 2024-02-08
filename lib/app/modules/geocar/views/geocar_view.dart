@@ -19,55 +19,46 @@ class GeoCarView extends GetView<GeoCarController> {
                 () => Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: List.generate(
-                          controller.categoryMovilList.length, (index) {
-                        var category = controller.categoryMovilList[index][0]
-                            as CategoryMovil;
-                        var icon =
-                            controller.categoryMovilList[index][1] as IconData;
-                        var label =
-                            controller.categoryMovilList[index][2] as String;
-
-                        return Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              controller.selectedMovilCategory.value = category;
-                              controller.generateRandomColor();
-                            },
+                        controller.categoryMovilList.length,
+                        (i) {
+                          var category = controller.categoryMovilList[i][0]
+                              as CategoryMovil;
+                          // var label =
+                          //     controller.categoryMovilList[i][2] as String;
+                          return Expanded(
                             child: Obx(
-                              () => Container(
-                                color: controller.selectedMovilCategory.value ==
-                                        category
-                                    ? controller.randomColor.value
-                                    : Colors.grey,
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      icon,
-                                      size: 30,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      label,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              () => IconButton(
+                                icon: controller
+                                        .categoryMovilList[i][1][0].value
+                                    ? Image.asset(
+                                        controller.categoryMovilList[i][1][1])
+                                    : Image.asset(
+                                        controller.categoryMovilList[i][1][2]),
+                                onPressed: () {
+                                  //cambio la ultima categoria de movil seleccionada a false
+                                  controller
+                                      .categoryMovilList[controller
+                                          .lastMovilSelected.value][1][0]
+                                      .value = false;
+                                  // actualizo ultima categoria a la selecionada por usuario
+                                  controller.lastMovilSelected.value = i;
+                                  //cambio categoria de movil seleccionada por usuario a true
+                                  controller.categoryMovilList[i][1][0].value =
+                                      true;
+                                  controller.selectedMovilCategory.value =
+                                      category;
+                                },
+                                iconSize: 60,
                               ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(
-                      height: 30,
+                      height: 20,
                     ),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,

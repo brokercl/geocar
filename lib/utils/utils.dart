@@ -67,9 +67,9 @@ enum Role {
 }
 
 enum CategoryMovil {
-  c, // moto auto camioneta
-  b, // bus camion
-  r, //: bus camion con remolque
+  c, // moto, auto, camioneta
+  b, // bus, camion
+  r, //: bus articulado, camion con remolque
 }
 
 enum CardinalPoint { NW, N, NE, E, SW, S, SE, W }

@@ -22,8 +22,13 @@ const PointSchema = CollectionSchema(
       name: r'date',
       type: IsarType.dateTime,
     ),
-    r'tariff': PropertySchema(
+    r'point': PropertySchema(
       id: 1,
+      name: r'point',
+      type: IsarType.long,
+    ),
+    r'tariff': PropertySchema(
+      id: 2,
       name: r'tariff',
       type: IsarType.double,
     )
@@ -66,7 +71,8 @@ void _pointSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTime(offsets[0], object.date);
-  writer.writeDouble(offsets[1], object.tariff);
+  writer.writeLong(offsets[1], object.point);
+  writer.writeDouble(offsets[2], object.tariff);
 }
 
 Point _pointDeserialize(
@@ -77,9 +83,10 @@ Point _pointDeserialize(
 ) {
   final object = Point(
     date: reader.readDateTimeOrNull(offsets[0]),
-    id: id,
-    tariff: reader.readDouble(offsets[1]),
+    point: reader.readLong(offsets[1]),
+    tariff: reader.readDouble(offsets[2]),
   );
+  object.id = id;
   return object;
 }
 
@@ -93,6 +100,8 @@ P _pointDeserializeProp<P>(
     case 0:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
+      return (reader.readLong(offset)) as P;
+    case 2:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -100,7 +109,7 @@ P _pointDeserializeProp<P>(
 }
 
 Id _pointGetId(Point object) {
-  return object.id ?? Isar.autoIncrement;
+  return object.id;
 }
 
 List<IsarLinkBase<dynamic>> _pointGetLinks(Point object) {
@@ -258,23 +267,7 @@ extension PointQueryFilter on QueryBuilder<Point, Point, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Point, Point, QAfterFilterCondition> idIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'id',
-      ));
-    });
-  }
-
-  QueryBuilder<Point, Point, QAfterFilterCondition> idIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'id',
-      ));
-    });
-  }
-
-  QueryBuilder<Point, Point, QAfterFilterCondition> idEqualTo(Id? value) {
+  QueryBuilder<Point, Point, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -284,7 +277,7 @@ extension PointQueryFilter on QueryBuilder<Point, Point, QFilterCondition> {
   }
 
   QueryBuilder<Point, Point, QAfterFilterCondition> idGreaterThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -297,7 +290,7 @@ extension PointQueryFilter on QueryBuilder<Point, Point, QFilterCondition> {
   }
 
   QueryBuilder<Point, Point, QAfterFilterCondition> idLessThan(
-    Id? value, {
+    Id value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -310,14 +303,66 @@ extension PointQueryFilter on QueryBuilder<Point, Point, QFilterCondition> {
   }
 
   QueryBuilder<Point, Point, QAfterFilterCondition> idBetween(
-    Id? lower,
-    Id? upper, {
+    Id lower,
+    Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterFilterCondition> pointEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'point',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterFilterCondition> pointGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'point',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterFilterCondition> pointLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'point',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterFilterCondition> pointBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'point',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -463,6 +508,18 @@ extension PointQuerySortBy on QueryBuilder<Point, Point, QSortBy> {
     });
   }
 
+  QueryBuilder<Point, Point, QAfterSortBy> sortByPoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'point', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterSortBy> sortByPointDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'point', Sort.desc);
+    });
+  }
+
   QueryBuilder<Point, Point, QAfterSortBy> sortByTariff() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tariff', Sort.asc);
@@ -501,6 +558,18 @@ extension PointQuerySortThenBy on QueryBuilder<Point, Point, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Point, Point, QAfterSortBy> thenByPoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'point', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Point, Point, QAfterSortBy> thenByPointDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'point', Sort.desc);
+    });
+  }
+
   QueryBuilder<Point, Point, QAfterSortBy> thenByTariff() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'tariff', Sort.asc);
@@ -521,6 +590,12 @@ extension PointQueryWhereDistinct on QueryBuilder<Point, Point, QDistinct> {
     });
   }
 
+  QueryBuilder<Point, Point, QDistinct> distinctByPoint() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'point');
+    });
+  }
+
   QueryBuilder<Point, Point, QDistinct> distinctByTariff() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'tariff');
@@ -538,6 +613,12 @@ extension PointQueryProperty on QueryBuilder<Point, Point, QQueryProperty> {
   QueryBuilder<Point, DateTime?, QQueryOperations> dateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'date');
+    });
+  }
+
+  QueryBuilder<Point, int, QQueryOperations> pointProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'point');
     });
   }
 

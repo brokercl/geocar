@@ -25,54 +25,68 @@ class LocateView extends GetView<LocateController> {
             child: Column(
               children: [
                 Container(
-                  color: const Color.fromARGB(146, 245, 60, 122),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(geoCarController.categoryMovilList[geoCarController
-                          .selectedMovilCategory.value.index][1]),
-                      Text(
-                        geoCarController.categoryMovilList[geoCarController
-                            .selectedMovilCategory.value.index][2],
-                        style: TextStyle(fontSize: locateViewfontZise),
-                      ),
-                      Transform.rotate(
-                        angle: controller.heading.value,
-                        child: const Icon(
-                          Icons.arrow_forward,
-                          size: 50.0,
-                        ),
-                      ),
-                      Text('heading: ${controller.heading.value}'),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 6,
-                ),
-                Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
                     color: const Color.fromARGB(184, 120, 162, 234),
                   ),
                   child: Column(
                     children: [
-                      Text('direction: ${controller.direction.value}'),
-                      const SizedBox(height: 10),
-                      Text(
-                        'patente: ${geoCarController.patenteController.value.text}',
-                        style: TextStyle(fontSize: locateViewfontZise),
-                      ),
-                      Text(
-                        'Direction: ${controller.bearing.value}',
-                        style: TextStyle(fontSize: locateViewfontZise),
-                      ),
                       Text(
                         'Current Date: ${controller.getFormattedDate()}',
                         style: TextStyle(fontSize: locateViewfontZise),
                       ),
                       Text(
                         'Current Time: ${controller.getFormattedTime()}',
+                        style: TextStyle(fontSize: locateViewfontZise),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    color: const Color.fromARGB(184, 182, 104, 230),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            geoCarController.categoryMovilList[geoCarController
+                                .selectedMovilCategory.value.index][1][1],
+                            width: 60,
+                          ),
+                          Text(
+                            ' ${geoCarController.categoryMovilList[geoCarController.selectedMovilCategory.value.index][2]}',
+                            style: TextStyle(fontSize: locateViewfontZise),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        'patente: ${geoCarController.patenteController.value.text}',
+                        style: TextStyle(fontSize: locateViewfontZise),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Transform.rotate(
+                            angle: controller.heading.value,
+                            child: const Icon(
+                              Icons.arrow_forward,
+                              size: 50.0,
+                            ),
+                          ),
+                          Text('heading: ${controller.heading.value}'),
+                        ],
+                      ),
+                      Text('direction: ${controller.direction.value}'),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Direction: ${controller.bearing.value}',
                         style: TextStyle(fontSize: locateViewfontZise),
                       ),
                       Text(
@@ -95,56 +109,56 @@ class LocateView extends GetView<LocateController> {
                       borderRadius: BorderRadius.circular(30),
                       color: const Color.fromARGB(162, 255, 214, 64),
                     ),
-                    child: Column(
-                      children: [
-                        Text(controller.redConsecionesTagChile[controller
-                            .porticoMatch.value][0][0][0]), // nombre concesion
+                    child: controller.porticoMatch.value ==
+                            -1 // porticoMatch es inicializado -1 indicando no portico
+                        ? const Text('Buscando Portico')
+                        : Column(
+                            children: [
+                              Text(controller.redConsecionesTagChile[
+                                      controller.porticoMatch.value][0][0]
+                                  .toString()), // nombre concesion
 
-                        Text(controller.redConsecionesTagChile[controller
-                            .porticoMatch.value][0][0][1][0]), // nombre eje
-                        Text(controller.redConsecionesTagChile[controller
-                            .porticoMatch.value][0][0][1][1][0]), // Direccion
-                        Text(
-                            controller.redConsecionesTagChile[
-                                    controller.porticoMatch.value][0][1] +
-                                ' ' +
-                                controller.redConsecionesTagChile[
-                                    controller.porticoMatch.value][0][2],
-                            style:
-                                trueSubTitleLocateTextStyle), // codigo + nombre portico
-                        Text(
-                          '${controller.redConsecionesTagChile[controller.porticoMatch.value][2]}',
-                        ), // latitud longitud del portico
-                        // en posicion 8, comienzan las tarifas
-                        Text(
-                          'tarifa: ${controller.tariff.value}',
-                          style: TextStyle(
-                              color: controller.isHoraSaturada.value
-                                  ? horaSaturada
-                                  : controller.isHoraPunta.value
-                                      ? horaPunta
-                                      : horaBaja),
-                        ),
-                        Visibility(
-                          visible: controller.isHoraSaturada.value,
-                          child: Text(
-                              'hora saturada: ${controller.inicioHoraSaturada.hour}:${controller.inicioHoraSaturada.minute == 0 ? '00' : '${controller.inicioHoraSaturada.minute}'} - ${controller.finHoraSaturada.hour}:${controller.finHoraSaturada.minute == 0 ? '00' : '${controller.finHoraSaturada.minute}'}',
-                              style: TextStyle(color: horaSaturada)),
-                        ),
-                        Visibility(
-                          visible: controller.isHoraPunta.value,
-                          child: Text(
-                              'hora punta: ${controller.inicioHoraPunta.hour}:${controller.inicioHoraPunta.minute == 0 ? '00' : '${controller.inicioHoraPunta.minute}'} - ${controller.finHoraPunta.hour}:${controller.finHoraPunta.minute == 0 ? '00' : '${controller.finHoraPunta.minute}'}',
-                              style: TextStyle(color: horaPunta)),
-                        ),
-                        Visibility(
-                          visible: !(controller.isHoraSaturada.value ||
-                              controller.isHoraPunta.value),
-                          child: Text('hora baja:',
-                              style: TextStyle(color: horaBaja)),
-                        ),
-                      ],
-                    ),
+                              Text(
+                                  controller.redConsecionesTagChile[
+                                          controller.porticoMatch.value][0][1] +
+                                      ' ' +
+                                      controller.redConsecionesTagChile[
+                                          controller.porticoMatch.value][0][2],
+                                  style:
+                                      trueSubTitleLocateTextStyle), // codigo + nombre portico
+                              Text(
+                                '${controller.redConsecionesTagChile[controller.porticoMatch.value][2]}',
+                              ), // latitud longitud del portico
+                              // en posicion 8, comienzan las tarifas
+                              Text(
+                                'tarifa: ${controller.tariff.value}',
+                                style: TextStyle(
+                                    color: controller.isHoraSaturada.value
+                                        ? horaSaturada
+                                        : controller.isHoraPunta.value
+                                            ? horaPunta
+                                            : horaBaja),
+                              ),
+                              Visibility(
+                                visible: controller.isHoraSaturada.value,
+                                child: Text(
+                                    'hora saturada: ${controller.inicioHoraSaturada.hour}:${controller.inicioHoraSaturada.minute == 0 ? '00' : '${controller.inicioHoraSaturada.minute}'} - ${controller.finHoraSaturada.hour}:${controller.finHoraSaturada.minute == 0 ? '00' : '${controller.finHoraSaturada.minute}'}',
+                                    style: TextStyle(color: horaSaturada)),
+                              ),
+                              Visibility(
+                                visible: controller.isHoraPunta.value,
+                                child: Text(
+                                    'hora punta: ${controller.inicioHoraPunta.hour}:${controller.inicioHoraPunta.minute == 0 ? '00' : '${controller.inicioHoraPunta.minute}'} - ${controller.finHoraPunta.hour}:${controller.finHoraPunta.minute == 0 ? '00' : '${controller.finHoraPunta.minute}'}',
+                                    style: TextStyle(color: horaPunta)),
+                              ),
+                              Visibility(
+                                visible: !(controller.isHoraSaturada.value ||
+                                    controller.isHoraPunta.value),
+                                child: Text('hora baja:',
+                                    style: TextStyle(color: horaBaja)),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ],

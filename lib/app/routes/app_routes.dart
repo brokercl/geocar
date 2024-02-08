@@ -6,6 +6,7 @@ abstract class Routes {
   static const geocar = _Paths.geocar;
   static const locate = _Paths.locate;
   static const lawyer = _Paths.lawyer;
+  static const invoice = _Paths.invoice;
 }
 
 abstract class _Paths {
@@ -13,4 +14,5 @@ abstract class _Paths {
   static const geocar = '/geocar';
   static const locate = '/locate';
   static const lawyer = '/lawyer';
+  static const invoice = '/invoice';
 }

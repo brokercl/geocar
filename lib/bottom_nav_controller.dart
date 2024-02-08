@@ -19,6 +19,14 @@ class BottomNavController extends GetxController {
         }
       case 2:
         if (geoCarController.isPatenteFormatOk.value) {
+          Get.toNamed(Routes.invoice);
+        } else {
+          Get.snackbar('Patente No Ingresada', 'por favor ingrese su patente..',
+              snackPosition: SnackPosition.BOTTOM);
+        }
+
+      case 3:
+        if (geoCarController.isPatenteFormatOk.value) {
           Get.toNamed(Routes.lawyer);
         } else {
           Get.snackbar('Patente No Ingresada', 'por favor ingrese su patente..',

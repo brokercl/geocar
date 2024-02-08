@@ -11,6 +11,7 @@ class BottomNavBar extends StatelessWidget {
   final List<IconData> icons = [
     Icons.bike_scooter,
     Icons.location_on,
+    Icons.inventory_outlined,
     Icons.balance,
   ];
 
@@ -23,14 +24,7 @@ class BottomNavBar extends StatelessWidget {
         items: List.generate(
           icons.length,
           (index) => BottomNavigationBarItem(
-            icon: Icon(
-                index == 0
-                    ? geoCarController.categoryMovilList[geoCarController
-                        .categoryMovilList
-                        .indexWhere((element) =>
-                            element[0] ==
-                            geoCarController.selectedMovilCategory.value)][1]
-                    : icons[index],
+            icon: Icon(icons[index],
                 color: bottomNavController.selectedView.value == index
                     ? geoCarController.isPatenteFormatOk.value
                         ? selected

@@ -17,32 +17,23 @@ class LocateController extends GetxController {
     db = openIsarDB();
   }
 
-  RxList<dynamic> tagConcesiones = RxList([
+  RxList<dynamic> tagConcesiones = RxList(
     [
-      'Autopista Central',
       [
-        'EJE NORTE - SUR',
-        ['Dirección Sur- Norte', 'Dirección Norte - Sur']
+        ['Autopista Central', 'EJE NORTE - SUR', 'Dirección Sur - Norte'],
+        ['Autopista Central', 'EJE NORTE - SUR', 'Dirección Norte - Sur'],
+        ['Autopista Central', 'EJE GENERAL VELÁSQUEZ', 'Dirección Sur - Norte'],
+        ['Autopista Central', 'EJE GENERAL VELÁSQUEZ', 'Dirección Norte - Sur'],
       ],
-      [
-        'EJE GENERAL VELÁSQUEZ',
-        ['Dirección Sur- Norte', 'Dirección Norte - Sur']
-      ]
     ],
-    ['Costanera Norte', 'head S'],
-    ['Costanera Norte', 'head N'],
-    ['Tunel San Cristobal', 'head ?'],
-    ['Vespucio Norte', 'head ?'],
-    ['Vespucio Sur', 'head ?'],
-  ]);
-
-  RxString usandoTagConsecion = RxString('');
+  );
 
   RxList<dynamic> redConsecionesTagChile = RxList();
 
   // este int almacena la posicion de redConsecionesTagChile
   // para mostrar todos sus atributos
-  RxInt porticoMatch = RxInt(0);
+  RxInt porticoMatch =
+      RxInt(-1); // porticoMatch es inicializado -1 indicando no portico
 
   RxList<Point> points = RxList<Point>();
 
@@ -61,21 +52,32 @@ class LocateController extends GetxController {
     276.063, // [2] Tarifa Saturada para categoria 3 y 5
   ];
 
-// TODO checkMovilInsideRoute
-  void checkMovilInsideRoute(Position currentPosition) {
-    // Supongamos que la ruta está centrada en el origen (0, 0) y tiene un ancho de 7 metros.
-    double pathWidth = 7.0;
-//    double radioVerificacion = 3.5;
+/*
+ checkMovilInsideRoute
+ no cobrar tag cuando movil pasa por caletera
+ The Earth's circumference is approximately 40,000 kilometers,
+ and there are 360 degrees of latitude around the Earth.
+ Therefore, 1 degree of latitude is roughly equal to 40,000 km / 360 ≈ 111.11 km.
 
-    double distanceToCenter = currentPosition.latitude +
-        currentPosition.longitude; // Calcular la distancia al centro de la ruta
+To convert meters to degrees for latitude, you can use the following formula:
 
-    if (distanceToCenter < pathWidth / 2) {
-      movilIsInsideRoute.value = true;
-    } else {
-      movilIsInsideRoute.value = false;
-    }
-  }
+Change in Latitude (degrees) =           Change in Meters
+                              ________________________________________
+                              Approximate Meters per Degree at Equator
+
+So, for a change of 3 meters:
+
+Change in Latitude (degrees) =    3.5
+                                ______
+                                111.11
+
+Change in Latitude (degrees) ≈ 0.031500315
+
+Therefore, you would add approximately 0.031500315 degrees to your original latitude coordinate.
+Keep in mind that this is a rough estimate, and the conversion factor can vary slightly depending on your location on Earth.
+*/
+
+  double routeWidth = 0.031500315;
 
   CardinalPoint calculateCardinalPoint(double heading) {
     if (heading >= 337.5 || heading < 22.5) {
@@ -99,18 +101,26 @@ class LocateController extends GetxController {
 
   addUpdatePoint(Point addUpdatePoint) async {
     final isar = await db;
-    try {
-      isar.writeTxnSync<int>(() => isar.points.putSync(addUpdatePoint));
-      if (useCase == UseCases.addPoint) points.add(addUpdatePoint);
-      if (useCase == UseCases.updatePoint) {
+//      isar.writeTxnSync<int>(() => isar.points.putSync(addUpdatePoint));
+    if (useCase == UseCases.addPoint) {
+      try {
+        await isar.writeTxn(() async {
+          await isar.points.put(addUpdatePoint); // insert & update
+        });
+      } catch (e) {
+        Get.snackbar('error trying addUpdatePoint()', e.toString());
+      }
+    }
+    if (useCase == UseCases.updatePoint) {
+      try {
         final indexWherePoint = points.indexWhere(
             (foundedPoints) => foundedPoints.id == addUpdatePoint.id);
         points[indexWherePoint] = addUpdatePoint;
+      } catch (e) {
+        Get.snackbar('error trying addUpdatePoint()', e.toString());
       }
-      addUpdatePointAlarm();
-    } catch (e) {
-      Get.snackbar('error trying addUpdatePoint()', e.toString());
     }
+    addUpdatePointAlarm();
   }
 
   Future<void> deletePoint(Point? point) async {
@@ -156,9 +166,11 @@ class LocateController extends GetxController {
   // para chequear que movil pasa dentro del radio (el portico en cuyo caso se registra el punto) y no fuera (la caletera)
 
 /* tengo una matriz de tarifas donde:
-las fila son los porticos
-las columnas estan los tipos de vehiculos
-las subcolumnas estan los 3 tipos de tarifas TBFP, TBP y TS por vehiculo
+cada hoja es un portico
+las filas son las propiedades del portico
+las filas 4, 5 y 6  estan los 3 tipos de tarifas TBFP, TBP y TS
+las columnas de estas filas tienen los horarios para 
+los dias laborales, sabados y festivos y domingos
 los tipos de vehiculos son: (1-4: moto, auto, camioneta, 2: bus, camion, 3: bus articulado, camion con remolque)
 para aplicar tarifa conozco:
 hora para aplicar o Tarifa Base Fuera Punta TBFP o Tarifa Base Punta TBP o Tarifa Saturacion TS
@@ -370,13 +382,18 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
   DateTime inicioHoraSaturada = DateTime.now();
   DateTime finHoraSaturada = DateTime.now();
 
+  var lastPortico = 0;
+
   @override
   void onInit() async {
+    lastPosition = setLatLong(0, 0);
     currentPosition = setLatLong(0, 0);
+
+    // Dirección Sur- Norte
 
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA2', // codigo del portico
         'Los Guindos - La Capilla' // Referencia de tramos
       ],
@@ -404,7 +421,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA3', // codigo del portico
         'La Capilla - Colón' // Referencia de tramos
       ],
@@ -432,7 +449,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA5', // codigo del portico
         'Colón - Las Acacias' // Referencia de tramos
       ],
@@ -460,12 +477,12 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA7', // codigo del portico
-        'casaPtoVaras' // Referencia de tramos
+        'Depto Stgo' // Referencia de tramos
       ],
       4.35, // longitud del portico
-      setLatLong(-41.3144754, -72.9904253),
+      setLatLong(-33.4135777, -70.5798551),
       // control horarios
       [
         // laboral
@@ -489,7 +506,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA30', // codigo del portico
         'Américo Vespucio - Departamental' // Referencia de tramos
       ],
@@ -517,7 +534,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA10', // codigo del portico
         'Departamental - Carlos Valdovinos' // Referencia de tramos
       ],
@@ -545,7 +562,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA31', // codigo del portico
         'Carlos Valdovinos - Alameda' // Referencia de tramos
       ],
@@ -573,7 +590,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA13', // codigo del portico
         'Alameda - Río Mapocho' // Referencia de tramos
       ],
@@ -601,7 +618,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     ]);
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA16', // codigo del portico
         'Río Mapocho - 14 de la Fama' // Referencia de tramos
       ],
@@ -630,7 +647,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
 
     redConsecionesTagChile.add([
       [
-        tagConcesiones[0],
+        tagConcesiones[0][0],
         'PA17', // codigo del portico
         '14 de la Fama - A. Vespucio Norte' // Referencia de tramos
       ],
@@ -657,37 +674,387 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
     ]);
 
-/* calculo tarifas por portico
-  1ro se calculan las tarifas en horario normal
-  luego las de hora punta
- finalmente se calculan las tarifas en horario saturado
-para ello se utiliza la sgte lista ya definida
-  final List<double> costoKm = [
-    92.021, // [0] Tarifa Normal para categoria 1 y 4, factor 1
-    184.042, // [1] Tarifa Punta para categoria 2, factor 2
-    276.063, // [2] Tarifa Saturada para categoria 3 y 5, factor 3
-  ];
-   que se multiplica por la longitud del portico y por el factor segun tipo de vehiculo
-  esto da como resultado, 3 valores lo que segun el horario normal, punta o saturado, se selecciona el valor adecuado
+    // Dirección Norte - Sur
 
-*/
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA18', // codigo del portico
+        'A. Vespucio Norte - 14 de la Fama' // Referencia de tramos
+      ],
+      4.45, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '07:00 - 09:00 / 17:00 - 19:00', // saturado
+        '09:00 - 09:30 / 11:30 - 12:00 / 16:30 - 17:00', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
 
-// el valor de esta var es igual para cualquier elemento de la lista redConsecionesTagChile
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA15', // codigo del portico
+        '14 de la Fama - Río Mapocho' // Referencia de tramos
+      ],
+      4.09, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '07:00 - 08:00 / 18:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA14', // codigo del portico
+        'Río Mapocho - Alameda' // Referencia de tramos
+      ],
+      1.75, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '07:30 - 08:30 / 09:00 - 10-00 / 12:30 - 13:00 / 15:30 - 16:30 / 17:00 - 17:30 / 18:30 - 19:00', // saturado
+        '08:30 - 09:00 / 10:00 - 10:30 / 11:00 - 12:30 / 13:00 - 15:30 / 16:30 - 17:00 / 17:30 - 18:30 / 19:00 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '11:00 - 15:00', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA12', // codigo del portico
+        'Alameda - Carlos Valdovinos' // Referencia de tramos
+      ],
+      3.55, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '07:30 - 08:30 / 09:00 - 10-00 / 12:30 - 13:00 / 15:30 -16:30 / 17:00 - 17:30 / 18:30 - 19:00', // saturado
+        '08:30 - 09:00 / 10:00 - 10:30 / 11:00 - 12:30 / 13:00 - 15:30 / 16:30 - 17:00 / 17:30 - 18:30 / 19:00 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '11:00 - 15:00', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA11', // codigo del portico
+        'Carlos Valdovinos - Departamental' // Referencia de tramos
+      ],
+      2.75, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '17:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '11:00 - 15:00', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA9', // codigo del portico
+        'Departamental - Américo Vespucio' // Referencia de tramos
+      ],
+      3.78, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '17:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '11:00 - 15:00', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA8', // codigo del portico
+        'Américo Vespucio - Las Acacias' // Referencia de tramos
+      ],
+      4.35, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '18:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA32', // codigo del portico
+        'Las Acacias - Lo Blanco' // Referencia de tramos
+      ],
+      1.70, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '18:00 - 19:30', // saturado
+        '17:00 - 18:00 / 19:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA6', // codigo del portico
+        'Lo Blanco - Colón' // Referencia de tramos
+      ],
+      1.52, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '18:00 - 19:30', // saturado
+        '17:00 - 18:00 / 19:30 - 20:30', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA37', // codigo del portico
+        'Colón - Calera de Tango' // Referencia de tramos
+      ],
+      4.38, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add([
+      [
+        tagConcesiones[0][1],
+        'PA4', // codigo del portico
+        'Calera de Tango - La Capilla' // Referencia de tramos
+      ],
+      1.25, // longitud del portico
+      setLatLong(-33.6947523, -70.7239556),
+      // control horarios
+      [
+        // laboral
+        '', // saturado
+        '', // punta
+        // si no es saturado ni punta es horario normal
+      ],
+      [
+        // sabado y festivo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+      [
+        // domingo
+        '', // no tiene horario saturado
+        '', // solo tiene horario punta
+        // entonces si no es punta es horario normal
+      ],
+    ]);
+
+    redConsecionesTagChile.add(
+      [
+        [
+          tagConcesiones[0][1],
+          'PA1', // codigo del portico
+          'La Capilla - Los Guindos' // Referencia de tramos
+        ],
+        7.68, // longitud del portico
+        setLatLong(-33.6947523, -70.7239556),
+        // control horarios
+        [
+          // laboral
+          '', // saturado
+          '', // punta
+          // si no es saturado ni punta es horario normal
+        ],
+        [
+          // sabado y festivo
+          '', // no tiene horario saturado
+          '', // solo tiene horario punta
+          // entonces si no es punta es horario normal
+        ],
+        [
+          // domingo
+          '', // no tiene horario saturado
+          '', // solo tiene horario punta
+          // entonces si no es punta es horario normal
+        ],
+      ],
+    );
+
+    /* calculo tarifas por portico
+          1ro se calculan las tarifas en horario normal
+          luego las de hora punta
+        finalmente se calculan las tarifas en horario saturado
+        para ello se utiliza la sgte lista ya definida
+        lista que hay que actualizar anualmente
+          final List<double> costoKm = [
+            92.021, // [0] Tarifa Normal para categoria 1 y 4, factor 1
+            184.042, // [1] Tarifa Punta para categoria 2, factor 2
+            276.063, // [2] Tarifa Saturada para categoria 3 y 5, factor 3
+          ];
+          que se multiplica por la longitud del portico y por el factor segun tipo de vehiculo
+          esto da como resultado, 3 valores lo que segun el horario normal, punta o saturado, se selecciona el valor adecuado
+
+        */
+
+    // el valor de esta var es igual para cualquier elemento de la lista redConsecionesTagChile
     var redConsecionesTagChileFilaLength = redConsecionesTagChile[9].length;
 
     for (var hoja = 0; hoja < redConsecionesTagChile.length; hoja++) {
-      print(
-          'redConsecionesTagChile[$hoja][0][1] ${redConsecionesTagChile[hoja][0][1]}');
-      print('');
       // si el valor para horas saturadas es vacio o empty => la tarifa saturada sera 0
       print(
-          '${red}laboral saturado redConsecionesTagChile[$hoja][3][0]: ${redConsecionesTagChile[hoja][3][0]}');
+          '${red}horario laboral saturado ${redConsecionesTagChile[hoja][0][0]} [$hoja][3][0]: ${redConsecionesTagChile[hoja][3][0]}');
       // si el valor para horas punta es vacio o empty => la tarifa punta sera 0
       print(
-          '${yellow}laboral punta redConsecionesTagChile[$hoja][3][1]: ${redConsecionesTagChile[hoja][3][1]}');
+          '${yellow}horario laboral punta ${redConsecionesTagChile[hoja][0][0]} [$hoja][3][1]: ${redConsecionesTagChile[hoja][3][1]}');
       print('');
       for (var fila = redConsecionesTagChileFilaLength;
-          fila < redConsecionesTagChileFilaLength + 3;
+          fila < redConsecionesTagChileFilaLength + costoKm.length;
           fila++) {
         redConsecionesTagChile[hoja].add([
           double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
@@ -731,69 +1098,86 @@ para ello se utiliza la sgte lista ya definida
     checktime = Timer.periodic(const Duration(milliseconds: 30), (timer) {
       now.value = DateTime.now();
     });
-    checkLatLong = Timer.periodic(const Duration(seconds: 1), (timer) {
-      getLocation();
+    checkLatLong = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        getLocation();
 
-// TODO taco: cada segundo se revisan todos los porticos para saber por cual portico el movil esta pasando
-// posible solucion, de acuerdo a ultima posicion conocida se podria intuir en un radio de 10 kms
-// pos cuales porticos el movil podria pasar, dependiendo de la ruta seleccionada por movil
-// de esta forma solo se revisarian 5 o 6 porticos dentro del radio y no todos
-// a cada portico chequeado, los valores se actualizan
+        // TODO taco: cada segundo se revisan todos los porticos para saber por cual portico el movil esta pasando
+        // posible solucion, de acuerdo a ultima posicion conocida se podria intuir en un radio de 10 kms
+        // pos cuales porticos el movil podria pasar, dependiendo de la ruta seleccionada por movil
+        // de esta forma solo se revisarian 5 o 6 porticos dentro del radio y no todos
+        // a cada portico chequeado, los valores se actualizan
 
-// por otro lado, quiza no valga la pena este calculo, ya que el total de porticos no superaria los 100
+        // por otro lado, quiza no valga la pena este calculo, ya que el total de porticos no superaria los 100
 
-      for (var portico = 0;
-          portico < redConsecionesTagChile.length;
-          portico++) {
-        if (chekDistance(currentPosition, redConsecionesTagChile[portico][2])
-                .value <
-            distanceRangePoint) {
-          porticoMatch.value = portico;
-          usandoTagConsecion.value = redConsecionesTagChile[portico][0][0][0];
-          if (now().weekday >= 1 && now().weekday <= 5) {
-            print('hoy es dia laboral');
+        for (var portico = lastPortico;
+            portico < redConsecionesTagChile.length;
+            portico++) {
+          /*
+                el sgte if chequea si movil pasa dentro del rango del portico (longitud) y sus latitudes, 
+                para determinar si movil pasa por ruta (cobra tag) o por caletera (NO cobra tag)
+                para el caso que movil se mueva de Norte a Sur
+              */
+          if (chekDistance(currentPosition, redConsecionesTagChile[portico][2])
+                      .value <
+                  distanceRangePoint &&
+              currentPosition.latitude <=
+                  redConsecionesTagChile[portico][2].latitude + routeWidth) {
+            porticoMatch.value = portico;
+            if (now().weekday >= 1 && now().weekday <= 5) {
+              print('hoy es dia laboral');
 
-            getTariffTag(redConsecionesTagChile[portico][3][0],
-                redConsecionesTagChile[portico][3][1]);
-          } else if (now().weekday == 6 || esFeriado) {
-            print('hoy es sabado o festivo');
+              getTariffTag(redConsecionesTagChile[portico][3][0],
+                  redConsecionesTagChile[portico][3][1]);
+            } else if (now().weekday == 6 || esFeriado) {
+              print('hoy es sabado o festivo');
 
-            getTariffTag(redConsecionesTagChile[portico][4][0],
-                redConsecionesTagChile[portico][4][1]);
-          } else if (now().weekday == 7) {
-            print('hoy es domingo');
-            getTariffTag(redConsecionesTagChile[portico][5][0],
-                redConsecionesTagChile[portico][5][1]);
-            // si no hay horarios ni para saturado ni para punta => tarifa = 0
+              getTariffTag(redConsecionesTagChile[portico][4][0],
+                  redConsecionesTagChile[portico][4][1]);
+            } else if (now().weekday == 7) {
+              print('hoy es domingo');
+              getTariffTag(redConsecionesTagChile[portico][5][0],
+                  redConsecionesTagChile[portico][5][1]);
+              // si no hay horarios ni para saturado ni para punta => tarifa = 0
+            }
+            // asignacion de tarifa para dias laborales, (sabados o festivos) y domingos
+            if (isHoraSaturada.value) {
+              tariff.value = redConsecionesTagChile[portico][
+                  redConsecionesTagChileFilaLength +
+                      geoCarController.selectedMovilCategory.value.index][2];
+            } else if (isHoraPunta.value) {
+              tariff.value = redConsecionesTagChile[portico][
+                  redConsecionesTagChileFilaLength +
+                      geoCarController.selectedMovilCategory.value.index][1];
+            } else {
+              tariff.value = redConsecionesTagChile[portico][
+                  redConsecionesTagChileFilaLength +
+                      geoCarController.selectedMovilCategory.value.index][0];
+            }
+            print(
+                'geoCarController.selectedMovilCategory.value.index: ${geoCarController.selectedMovilCategory.value.index}');
+            print('tariff: ${tariff.value}');
+            if (portico != lastPortico) {
+              // avoid same point saved more than once
+              addUpdatePoint(
+                Point(
+                  point:
+                      portico, //this id correspond to costaneraNorteNS[index] from where I get name and point coordinates (lat, long)
+                  date: now.value,
+                  tariff: tariff.value,
+                ),
+              );
+            }
+            lastPortico = portico;
+
+            break; // no need to keep searching, portico was founded..
           }
-          // asignacion de tarifa para dias laborales, (sabados o festivos) y domingos
-          if (isHoraSaturada.value) {
-            tariff.value = redConsecionesTagChile[portico][
-                redConsecionesTagChileFilaLength +
-                    geoCarController.selectedMovilCategory.value.index][2];
-          } else if (isHoraPunta.value) {
-            tariff.value = redConsecionesTagChile[portico][
-                redConsecionesTagChileFilaLength +
-                    geoCarController.selectedMovilCategory.value.index][1];
-          } else {
-            tariff.value = redConsecionesTagChile[portico][
-                redConsecionesTagChileFilaLength +
-                    geoCarController.selectedMovilCategory.value.index][0];
-          }
-          print(
-              'geoCarController.selectedMovilCategory.value.index: ${geoCarController.selectedMovilCategory.value.index}');
-          print('tariff: ${tariff.value}');
-
-          addUpdatePoint(Point(
-              id: portico, //this id correspond to costaneraNorteNS[index] from where I get name and point coordinates (lat, long)
-              date: now.value,
-              tariff: tariff.value));
         }
-        if (chekDistance(currentPosition, redConsecionesTagChile[portico][2])
-                .value <
-            distanceRangePoint) break;
-      }
-    });
+        print('lastPosition $lastPosition');
+        print('currentPosition $currentPosition');
+      },
+    );
   }
 
   @override
