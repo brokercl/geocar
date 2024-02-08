@@ -21,6 +21,12 @@ Color horaSaturada = const Color.fromARGB(255, 216, 33, 20);
 Color horaPunta = const Color.fromARGB(255, 200, 89, 4);
 Color horaBaja = const Color.fromARGB(255, 67, 211, 96);
 
+// impresion consola depuracion en colores
+String reset = '\x1B[0m';
+String red = '\x1B[31m';
+String green = '\x1B[32m';
+String yellow = '\x1B[33m';
+
 TextStyle trueTitleLocateTextStyle = TextStyle(color: itsTrue, fontSize: 30);
 TextStyle falseTitleLocateTextStyle = TextStyle(color: itsfalse, fontSize: 30);
 TextStyle trueSubTitleLocateTextStyle = TextStyle(color: itsTrue, fontSize: 20);
@@ -67,3 +73,27 @@ enum CategoryMovil {
 }
 
 enum CardinalPoint { NW, N, NE, E, SW, S, SE, W }
+
+// TODO actualiza feriados todos los años
+final List<DateTime> feriados = [
+  DateTime(2024, 1, 1), // Año Nuevo
+  DateTime(2024, 3, 29), // Viernes Santo
+  DateTime(2024, 3, 30), // Sábado Santo
+  DateTime(2024, 5, 1), // Día del Trabajo
+  DateTime(2024, 5, 21), // Día de las Glorias Navales
+  DateTime(2024, 6, 9), // Elecciones Primarias Alcaldes y Gobernadores
+  DateTime(2024, 6, 20), // Día Nacional de los Pueblos Indígenas
+  DateTime(2024, 6, 29), // San Pedro y San Pablo
+  DateTime(2024, 7, 16), // Día de la Virgen del Carmen
+  DateTime(2024, 8, 15), // Asunción de la Virgen
+  DateTime(2024, 9, 18), // Independencia Nacional
+  DateTime(2024, 9, 19), // Día de las Glorias del Ejército
+  DateTime(2024, 9, 20), // Feriado añadido de Fiestas Patrias
+  DateTime(2024, 10, 12), // Encuentro de Dos Mundos
+  DateTime(2024, 10,
+      27), // Elecciones Municipales, Consejeros Regionales y Gobernadores Regionales
+  DateTime(2024, 10, 31), // Día de las Iglesias Evangélicas y Protestantes
+  DateTime(2024, 11, 1), // Día de Todos los Santos
+  DateTime(2024, 12, 8), // Inmaculada Concepción
+  DateTime(2024, 12, 25), // Navidad
+];

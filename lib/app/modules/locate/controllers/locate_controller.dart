@@ -61,30 +61,6 @@ class LocateController extends GetxController {
     276.063, // [2] Tarifa Saturada para categoria 3 y 5
   ];
 
-// TODO actualiza feriados todos los años
-  final List<DateTime> feriados = [
-    DateTime(2024, 1, 1), // Año Nuevo
-    DateTime(2024, 3, 29), // Viernes Santo
-    DateTime(2024, 3, 30), // Sábado Santo
-    DateTime(2024, 5, 1), // Día del Trabajo
-    DateTime(2024, 5, 21), // Día de las Glorias Navales
-    DateTime(2024, 6, 9), // Elecciones Primarias Alcaldes y Gobernadores
-    DateTime(2024, 6, 20), // Día Nacional de los Pueblos Indígenas
-    DateTime(2024, 6, 29), // San Pedro y San Pablo
-    DateTime(2024, 7, 16), // Día de la Virgen del Carmen
-    DateTime(2024, 8, 15), // Asunción de la Virgen
-    DateTime(2024, 9, 18), // Independencia Nacional
-    DateTime(2024, 9, 19), // Día de las Glorias del Ejército
-    DateTime(2024, 9, 20), // Feriado añadido de Fiestas Patrias
-    DateTime(2024, 10, 12), // Encuentro de Dos Mundos
-    DateTime(2024, 10,
-        27), // Elecciones Municipales, Consejeros Regionales y Gobernadores Regionales
-    DateTime(2024, 10, 31), // Día de las Iglesias Evangélicas y Protestantes
-    DateTime(2024, 11, 1), // Día de Todos los Santos
-    DateTime(2024, 12, 8), // Inmaculada Concepción
-    DateTime(2024, 12, 25), // Navidad
-  ];
-
 // TODO checkMovilInsideRoute
   void checkMovilInsideRoute(Position currentPosition) {
     // Supongamos que la ruta está centrada en el origen (0, 0) y tiene un ancho de 7 metros.
@@ -384,33 +360,6 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
     return false;
   }
 
-// una matriz tiene 3 dimensiones (x,y,z), en informatica la x es la profundidad
-// como una pila de hojas, una hoja de papel encima de otra
-
-// los sgtes codigos de porticos son las hojas en la matriz de tarifas, (hojas,y,z)
-  int pa2 = 0;
-  int pa3 = 1;
-  int pa5 = 2;
-  int pa7 = 3;
-  int pa30 = 4;
-  int pa10 = 5;
-  int pa31 = 6;
-  int pa13 = 7;
-  int pa16 = 8;
-  int pa17 = 9;
-
-// cada hoja es como una planilla con filas y columnas
-
-// los sgtes grupos de vehiculos son las filas de cada hoja en la matriz de tarifas, (hoja,fila,?)
-  int grupo1y4 = 8;
-  int grupo2 = 9;
-  int grupo3y5 = 10;
-
-// por ultimo los sgtes tipos de tarifas son las columnas de cada fila de la hoja matriz de tarifas, (hoja,fila,columna)
-  int tarifaNormal = 0;
-  int tarifaPunta = 1;
-  int tarifaSaturada = 2;
-
   RxDouble tariff = RxDouble(0.0);
   RxBool isHoraSaturada = RxBool(false);
   RxBool isHoraPunta = RxBool(false);
@@ -433,8 +382,6 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       7.68, // longitud del portico
       setLatLong(-33.469212, -70.688426),
-      0,
-      false,
       // control horarios
       [
         // laboral
@@ -463,13 +410,11 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       5.63, // longitud del portico
       setLatLong(-33.5050412, -70.6967296),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '08:00 - 08:30', // saturado
+        '07:30 - 08:00 / 08:30 - 09:00', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
@@ -481,7 +426,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:00 - 20:00', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -493,13 +438,11 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       3.22, // longitud del portico
       setLatLong(-33.535322, -70.7073119),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '07:30 - 08:30', // saturado
+        '06:30 - 07:00 / 08:30 - 10:00', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
@@ -511,7 +454,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:00 - 20:00', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -523,14 +466,12 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       4.35, // longitud del portico
       setLatLong(-41.3144754, -72.9904253),
-      0,
-      false,
       // control horarios
       [
         // laboral
         // TODO revisar los espacios en el formato de fechas: 07:30 - 08:30 / ,
-        '07:30 - 08:30 / 09:00 - 10:00 / 12:30 - 13:00 / 15:30 - 16:30 / 17:00 - 17:30 / 18:30 - 19:00', // saturado
-        '08:30 - 09:00 / 10:00 - 10:30 / 11:00 - 12:30 / 13:00 - 15:30 / 16:30 - 17:00 / 17:30 - 18:30 / 19:00 - 20:30', // punta
+        '', // saturado
+        '07:30 - 09:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
@@ -542,7 +483,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:30 - 20:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -554,25 +495,23 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       3.78, // longitud del portico
       setLatLong(-33.5581375, -70.7106908),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '07:00 - 08:00 / 08:30 - 09:00', // saturado
+        '06:30 - 07:00 / 08:00 - 08:30 / 09:00 - 09:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
         // sabado y festivo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '7:30 - 9:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:30 - 20:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -584,25 +523,23 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       2.75, // longitud del portico
       setLatLong(-33.5821585, -70.7139955),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '07:00 - 08:00 / 08:30 - 09:00', // saturado
+        '06:30 - 07:00 / 08:00 - 08:30 / 09:00 - 09:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
         // sabado y festivo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '7:30 - 9:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:30 - 20:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -614,25 +551,23 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       3.55, // longitud del portico
       setLatLong(-33.5961085, -70.7157705),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '07:30 - 09:00', // saturado
+        '06:30 - 07:30 / 09:00 -12:00 / 12:30 - 13:00 / 14:00 - 14:30 / 17:00 - 19:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
         // sabado y festivo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '10:00 - 13:00', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:30 - 20:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -644,25 +579,23 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       1.75, // longitud del portico
       setLatLong(-33.6241357, -70.7148114),
-      0,
-      false,
       // control horarios
       [
         // laboral
-        '', // saturado
-        '', // punta
+        '07:30 - 09:00', // saturado
+        '06:30 - 07:30 / 09:00 - 12:00 / 12:30 - 13:00 / 14:00 - 14:30 / 17:00 - 19:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
         // sabado y festivo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '10:00 - 13:00', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
       [
         // domingo
         '', // no tiene horario saturado
-        '', // solo tiene horario punta
+        '18:30 - 20:30', // solo tiene horario punta
         // entonces si no es punta es horario normal
       ],
     ]);
@@ -674,13 +607,11 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       4.09, // longitud del portico
       setLatLong(-33.6947523, -70.7239556),
-      0,
-      false,
       // control horarios
       [
         // laboral
         '', // saturado
-        '', // punta
+        '07:30 - 09:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
@@ -705,13 +636,11 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       4.45, // longitud del portico
       setLatLong(-33.6947523, -70.7239556),
-      0,
-      false,
       // control horarios
       [
         // laboral
         '', // saturado
-        '', // punta
+        '07:00 - 10:30 / 11:00 - 13:00 / 17:30 - 19:30', // punta
         // si no es saturado ni punta es horario normal
       ],
       [
@@ -743,67 +672,55 @@ para ello se utiliza la sgte lista ya definida
 
 */
 
-    for (var hoja = 0; hoja < redConsecionesTagChile.length; hoja++) {
-      for (var fila = 8; fila < 11; fila++) {
-        // tarifas para el grupo 1 y 4 para fila = 0
-        //  tarifas para el grupo 2 para fila = 1
-        // tarifas para el grupo 3 y 5 para fila = 2
+// el valor de esta var es igual para cualquier elemento de la lista redConsecionesTagChile
+    var redConsecionesTagChileFilaLength = redConsecionesTagChile[9].length;
 
+    for (var hoja = 0; hoja < redConsecionesTagChile.length; hoja++) {
+      print(
+          'redConsecionesTagChile[$hoja][0][1] ${redConsecionesTagChile[hoja][0][1]}');
+      print('');
+      // si el valor para horas saturadas es vacio o empty => la tarifa saturada sera 0
+      print(
+          '${red}laboral saturado redConsecionesTagChile[$hoja][3][0]: ${redConsecionesTagChile[hoja][3][0]}');
+      // si el valor para horas punta es vacio o empty => la tarifa punta sera 0
+      print(
+          '${yellow}laboral punta redConsecionesTagChile[$hoja][3][1]: ${redConsecionesTagChile[hoja][3][1]}');
+      print('');
+      for (var fila = redConsecionesTagChileFilaLength;
+          fila < redConsecionesTagChileFilaLength + 3;
+          fila++) {
         redConsecionesTagChile[hoja].add([
-          double.parse((costoKm[fila - 8] * redConsecionesTagChile[hoja][1] * 1)
+          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+                  redConsecionesTagChile[hoja][1] *
+                  1) // tarifas para el grupo 1 y 4 para fila = 0
               .toStringAsFixed(2)),
-          double.parse((costoKm[fila - 8] * redConsecionesTagChile[hoja][1] * 2)
+          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+                  redConsecionesTagChile[hoja][1] *
+                  2 *
+                  (redConsecionesTagChile[hoja][3][1].isEmpty
+                      ? 0
+                      : 1)) //  tarifas para el grupo 2 para fila = 1
               .toStringAsFixed(2)),
-          double.parse((costoKm[fila - 8] * redConsecionesTagChile[hoja][1] * 3)
+          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+                  redConsecionesTagChile[hoja][1] *
+                  3 *
+                  (redConsecionesTagChile[hoja][3][0].isEmpty
+                      ? 0
+                      : 1)) // tarifas para el grupo 3 y 5 para fila = 2
               .toStringAsFixed(2)),
         ]);
       }
+      print('tarifa para vehiculos grupo 1 y 4');
+      print(
+          'redConsecionesTagChile[$hoja][$redConsecionesTagChileFilaLength] ${redConsecionesTagChile[hoja][redConsecionesTagChileFilaLength]}');
+      print('tarifa para vehiculos grupo 2');
+      print(
+          'redConsecionesTagChile[$hoja][${redConsecionesTagChileFilaLength + 1}] ${redConsecionesTagChile[hoja][redConsecionesTagChileFilaLength + 1]}');
+      print('tarifa para vehiculos grupo 3 y 5');
+      print(
+          'redConsecionesTagChile[$hoja][${redConsecionesTagChileFilaLength + 2}] ${redConsecionesTagChile[hoja][redConsecionesTagChileFilaLength + 2]}');
+      print('');
     }
-
-    // TODO hacer las correcciones anuales
-    // correcciones tarifa publica tag PA2
-    redConsecionesTagChile[pa2][grupo1y4][tarifaPunta] = 0.0;
-    redConsecionesTagChile[pa2][grupo1y4][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa2][grupo2][tarifaPunta] = 0.0;
-    redConsecionesTagChile[pa2][grupo2][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa2][grupo3y5][tarifaPunta] = 0.0;
-    redConsecionesTagChile[pa2][grupo3y5][tarifaSaturada] = 0.0;
-
-    // correcciones tarifa publica tag PA7
-    redConsecionesTagChile[pa7][grupo1y4][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa7][grupo2][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa7][grupo3y5][tarifaSaturada] = 0.0;
-
-    // correcciones tarifa publica tag PA16
-    redConsecionesTagChile[pa16][grupo1y4][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa16][grupo2][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa16][grupo3y5][tarifaSaturada] = 0.0;
-
-    // correcciones tarifa publica tag PA17
-    redConsecionesTagChile[pa17][grupo1y4][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa17][grupo2][tarifaSaturada] = 0.0;
-    redConsecionesTagChile[pa17][grupo3y5][tarifaSaturada] = 0.0;
-
-    for (var hoja = 0; hoja < redConsecionesTagChile.length; hoja++) {
-      print('cod tag: ${redConsecionesTagChile[hoja][0][1]}');
-      for (var fila = 8; fila < redConsecionesTagChile[hoja].length; fila++) {
-        switch (fila) {
-          case 8:
-            print('tarifa para vehiculos grupo 1 y 4');
-          case 9:
-            print('tarifa para vehiculos grupo 2');
-          case 10:
-            print('tarifa para vehiculos grupo 3 y 5');
-
-            break;
-          default:
-        }
-        print(
-            'redConsecionesTagChile[$hoja][$fila]: ${redConsecionesTagChile[hoja][fila]}');
-      }
-    }
-
-// set Lat Long Sur Norte
 
     super.onInit();
 
@@ -828,41 +745,40 @@ para ello se utiliza la sgte lista ya definida
       for (var portico = 0;
           portico < redConsecionesTagChile.length;
           portico++) {
-        redConsecionesTagChile[portico][3] =
-            chekDistance(currentPosition, redConsecionesTagChile[portico][2]);
-        redConsecionesTagChile[portico][4] =
-            redConsecionesTagChile[portico][3].value <
-                distanceRangePoint; // You can adjust the threshold distance
-
-        if (redConsecionesTagChile[portico][4]) {
+        if (chekDistance(currentPosition, redConsecionesTagChile[portico][2])
+                .value <
+            distanceRangePoint) {
           porticoMatch.value = portico;
           usandoTagConsecion.value = redConsecionesTagChile[portico][0][0][0];
           if (now().weekday >= 1 && now().weekday <= 5) {
             print('hoy es dia laboral');
 
-            getTariffTag(redConsecionesTagChile[portico][5][0],
-                redConsecionesTagChile[portico][5][1]);
+            getTariffTag(redConsecionesTagChile[portico][3][0],
+                redConsecionesTagChile[portico][3][1]);
           } else if (now().weekday == 6 || esFeriado) {
             print('hoy es sabado o festivo');
 
-            getTariffTag(redConsecionesTagChile[portico][6][0],
-                redConsecionesTagChile[portico][6][1]);
+            getTariffTag(redConsecionesTagChile[portico][4][0],
+                redConsecionesTagChile[portico][4][1]);
           } else if (now().weekday == 7) {
             print('hoy es domingo');
-            getTariffTag(redConsecionesTagChile[portico][7][0],
-                redConsecionesTagChile[portico][7][1]);
+            getTariffTag(redConsecionesTagChile[portico][5][0],
+                redConsecionesTagChile[portico][5][1]);
             // si no hay horarios ni para saturado ni para punta => tarifa = 0
           }
           // asignacion de tarifa para dias laborales, (sabados o festivos) y domingos
           if (isHoraSaturada.value) {
-            tariff.value = redConsecionesTagChile[portico]
-                [8 + geoCarController.selectedMovilCategory.value.index][2];
+            tariff.value = redConsecionesTagChile[portico][
+                redConsecionesTagChileFilaLength +
+                    geoCarController.selectedMovilCategory.value.index][2];
           } else if (isHoraPunta.value) {
-            tariff.value = redConsecionesTagChile[portico]
-                [8 + geoCarController.selectedMovilCategory.value.index][1];
+            tariff.value = redConsecionesTagChile[portico][
+                redConsecionesTagChileFilaLength +
+                    geoCarController.selectedMovilCategory.value.index][1];
           } else {
-            tariff.value = redConsecionesTagChile[portico]
-                [8 + geoCarController.selectedMovilCategory.value.index][0];
+            tariff.value = redConsecionesTagChile[portico][
+                redConsecionesTagChileFilaLength +
+                    geoCarController.selectedMovilCategory.value.index][0];
           }
           print(
               'geoCarController.selectedMovilCategory.value.index: ${geoCarController.selectedMovilCategory.value.index}');
@@ -873,6 +789,9 @@ para ello se utiliza la sgte lista ya definida
               date: now.value,
               tariff: tariff.value));
         }
+        if (chekDistance(currentPosition, redConsecionesTagChile[portico][2])
+                .value <
+            distanceRangePoint) break;
       }
     });
   }
