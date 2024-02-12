@@ -14,7 +14,7 @@ Future<void> main() async {
   runApp(
     GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Application",
+      title: "GeoCar",
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
     ),

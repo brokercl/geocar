@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
 var locateViewfontZise = 18.0;
 var geoCarViewfontZise = 18.0;
@@ -97,3 +98,16 @@ final List<DateTime> feriados = [
   DateTime(2024, 12, 8), // Inmaculada Concepción
   DateTime(2024, 12, 25), // Navidad
 ];
+
+Future<void> selectDate(BuildContext context, Rx<DateTime> dateTime,
+    DateTime firstDate, DateTime lastDate) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: dateTime.value,
+    firstDate: firstDate,
+    lastDate: lastDate,
+  );
+  if (picked != null && picked != dateTime.value) {
+    dateTime(picked);
+  }
+}

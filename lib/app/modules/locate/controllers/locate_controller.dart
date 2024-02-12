@@ -126,7 +126,7 @@ Keep in mind that this is a rough estimate, and the conversion factor can vary s
   Future<void> deletePoint(Point? point) async {
     final isar = await db;
     isar.writeTxn(() async {
-      await isar.points.delete(point!.id!);
+      await isar.points.delete(point!.id);
     });
     points.removeWhere((foundedPoint) => foundedPoint.id == point!.id);
   }
