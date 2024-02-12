@@ -34,7 +34,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.invoice,
-      page: () => const InvoiceView(),
+      page: () => InvoiceView(),
       binding: InvoiceBinding(),
     ),
   ];

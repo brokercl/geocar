@@ -17,7 +17,7 @@ class LawyerView extends GetView<LawyerController> {
       ),
       body: const Center(
         child: Text(
-          'Send Point to Lawyer..',
+          'Send Invoice to Lawyer..',
           style: TextStyle(fontSize: 20),
         ),
       ),
