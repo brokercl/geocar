@@ -99,15 +99,15 @@ final List<DateTime> feriados = [
   DateTime(2024, 12, 25), // Navidad
 ];
 
-Future<void> selectDate(BuildContext context, Rx<DateTime> dateTime,
+Future<void> selectDate(BuildContext context, Rx<DateTime> selectedDate,
     DateTime firstDate, DateTime lastDate) async {
-  final DateTime? picked = await showDatePicker(
+  final DateTime? pickedDate = await showDatePicker(
     context: context,
-    initialDate: dateTime.value,
-    firstDate: firstDate,
-    lastDate: lastDate,
+    initialDate: selectedDate.value,
+    firstDate: DateTime(1900),
+    lastDate: DateTime(2100),
   );
-  if (picked != null && picked != dateTime.value) {
-    dateTime(picked);
+  if (pickedDate != null && pickedDate != selectedDate.value) {
+    selectedDate.value = pickedDate;
   }
 }
