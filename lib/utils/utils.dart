@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:intl/intl.dart';
 
 var locateViewfontZise = 18.0;
 var geoCarViewfontZise = 18.0;
@@ -110,4 +111,9 @@ Future<void> selectDate(BuildContext context, Rx<DateTime> selectedDate,
   if (pickedDate != null && pickedDate != selectedDate.value) {
     selectedDate.value = pickedDate;
   }
+}
+
+String formatCurrency(double amount) {
+  final formatter = NumberFormat("#,###", "es_CL");
+  return formatter.format(amount);
 }

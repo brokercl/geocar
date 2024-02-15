@@ -13,9 +13,7 @@ class InvoiceView extends GetView<InvoiceController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Invoice'),
-      ),
+      appBar: appBar('Invoice View'),
       body: Column(
         children: [
           Obx(
@@ -112,7 +110,13 @@ class InvoiceView extends GetView<InvoiceController> {
               },
             ),
           ),
-          Obx(() => Text('total: ${controller.sumTariff.value}')),
+          Obx(() => Text(
+                'total: \$ ${formatCurrency(controller.sumTariff.value)}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    color: Colors.red),
+              )),
         ],
       ),
       bottomNavigationBar: BottomNavBar(),

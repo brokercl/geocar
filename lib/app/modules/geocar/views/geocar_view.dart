@@ -75,27 +75,39 @@ class GeoCarView extends GetView<GeoCarController> {
                           'AAAA12',
                           style: subTitleGeoCarTextStyle,
                         ),
+                        const SizedBox(
+                          height: 10,
+                        )
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: TextField(
-                            controller: controller.patenteController.value,
-                            maxLength: 6,
-                            textCapitalization: TextCapitalization.characters,
-                            inputFormatters: [_inputFormatter],
-                            decoration: InputDecoration(
-                                labelText: 'Ingresa tu Patente',
-                                labelStyle: subTitleGeoCarTextStyle),
-                            onChanged: (newPatente) {
-                              // close keyboard after check patente format
-                              if (controller.validarFormatoPlacaPatente(
-                                  newPatente)) Get.focusScope!.unfocus();
-                              controller.patenteController.value.text =
-                                  newPatente;
-                            },
+                          child: Container(
+                            width: 200, // adjust width as needed
+                            height: 100, // adjust height as needed
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(10),
+                            ), // adjust corner radius as needed
+                            child: TextField(
+                              controller: controller.patenteController.value,
+                              maxLength: 6,
+                              textCapitalization: TextCapitalization.characters,
+                              inputFormatters: [_inputFormatter],
+                              decoration: InputDecoration(
+                                  labelText: 'Ingresa tu Patente',
+                                  labelStyle: subTitleGeoCarTextStyle),
+                              onChanged: (newPatente) {
+                                // close keyboard after check patente format
+                                if (controller.validarFormatoPlacaPatente(
+                                    newPatente)) Get.focusScope!.unfocus();
+                                controller.patenteController.value.text =
+                                    newPatente;
+                              },
+                            ),
                           ),
                         ),
                         IconButton(

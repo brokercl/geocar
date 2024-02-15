@@ -8,11 +8,11 @@ class InvoiceController extends GetxController {
 
   Rx<DateTime> startDate =
       DateTime.now().obs; // startDate 2024-02-13 09:56:28.478660
-  late Rx<DateTime> endDate =
+  Rx<DateTime> endDate =
       DateTime.now().obs; // endDate 2024-02-13 09:56:28.478548
   // ojo: los milisegundos hacen que startDate and endDate NO sean iguales
 
-  RxInt sumTariff = RxInt(0);
+  RxDouble sumTariff = RxDouble(0);
 
   RxBool isFilterList = RxBool(false);
 
@@ -27,7 +27,7 @@ class InvoiceController extends GetxController {
     points.value = await isar.points.where().findAll();
 
     sumTariff.value =
-        points.fold<double>(0, (prev, curr) => prev + curr.tariff).round();
+        points.fold<double>(0, (prev, curr) => prev + curr.tariff);
 
     return points;
   }
@@ -56,7 +56,7 @@ class InvoiceController extends GetxController {
 
     // Calculate the sum of tariffs
     sumTariff.value =
-        points.fold<double>(0, (prev, curr) => prev + curr.tariff).round();
+        points.fold<double>(0, (prev, curr) => prev + curr.tariff);
 
     print('points.length ${points.length}');
 
