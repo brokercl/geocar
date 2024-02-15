@@ -34,10 +34,6 @@ class InvoiceView extends GetView<InvoiceController> {
                   onPressed: () async {
                     selectDate(context, controller.endDate, DateTime(2024, 1),
                         DateTime.now());
-                    if (controller.endDate.value
-                        .isBefore(controller.startDate.value)) {
-                      controller.endDate.value = controller.startDate.value;
-                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(
@@ -48,7 +44,16 @@ class InvoiceView extends GetView<InvoiceController> {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      controller.isFilterList.value = true;
+                      print(
+                          'controller.startDate ${controller.startDate} controller.endDate ${controller.endDate}');
+                      if (controller.endDate.value
+                          .isBefore(controller.startDate.value)) {
+                        Get.snackbar('Fecha final debe ser >= a fecha inicial',
+                            'por favor corrija..',
+                            snackPosition: SnackPosition.BOTTOM);
+                      } else {
+                        controller.isFilterList.value = true;
+                      }
                       // Call method to fetch points based on input dates
                       controller.findStartEndDatesPoints(
                           controller.startDate.value, controller.endDate.value);
@@ -110,13 +115,32 @@ class InvoiceView extends GetView<InvoiceController> {
               },
             ),
           ),
-          Obx(() => Text(
-                'total: \$ ${formatCurrency(controller.sumTariff.value)}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                    color: Colors.red),
-              )),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              InkWell(
+                onTap: () {},
+                child: Image.asset('assets/images/pdf_down.png'),
+              ),
+              Obx(
+                () => Text(
+                  '\$ ${formatCurrency(controller.sumTariff.value)}',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      color: Colors.red),
+                ),
+              ),
+              InkWell(
+                onTap: () {},
+                child: Image.asset('assets/images/excel_down.png'),
+              ),
+              InkWell(
+                onTap: () {},
+                child: Image.asset('assets/images/abogado.png'),
+              ),
+            ],
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavBar(),

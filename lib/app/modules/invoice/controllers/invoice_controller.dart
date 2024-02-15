@@ -11,7 +11,6 @@ class InvoiceController extends GetxController {
   Rx<DateTime> endDate =
       DateTime.now().obs; // endDate 2024-02-13 09:56:28.478548
   // ojo: los milisegundos hacen que startDate and endDate NO sean iguales
-
   RxDouble sumTariff = RxDouble(0);
 
   RxBool isFilterList = RxBool(false);
@@ -35,24 +34,18 @@ class InvoiceController extends GetxController {
   Future<RxList<Point>> findStartEndDatesPoints(
       DateTime startDate, DateTime endDate) async {
     final isar = await db;
-    if (startDate.year == endDate.year &&
-        startDate.month == endDate.month &&
-        startDate.day == endDate.day) {
-      print('startDate and endDate son iguales');
-      print('startDate $startDate, endDate $endDate');
-      // If start and end dates are the same, fetch points only for that specific date
-      points.value =
-          await isar.points.where().filter().dateEqualTo(startDate).findAll();
-    } else {
-      print('startDate and endDate no son iguales');
-      print('startDate $startDate, endDate $endDate');
-      points.value = await isar.points
-          .where()
-          .filter()
-          .dateBetween(startDate, endDate,
-              includeLower: true, includeUpper: true)
-          .findAll();
-    }
+
+    points.value = await isar.points
+        .where()
+        .filter()
+        .dateBetween(
+            (DateTime(
+                startDate.year, startDate.month, startDate.day, 0, 0, 0, 0, 0)),
+            DateTime(
+                endDate.year, endDate.month, endDate.day, 23, 59, 59, 999, 999),
+            includeLower: true,
+            includeUpper: true)
+        .findAll();
 
     // Calculate the sum of tariffs
     sumTariff.value =

@@ -30,10 +30,10 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: assets/images/logo.png
+  image_path: assets/images/geocar_logo.png
 
 flutter_native_splash:
-  color: '#f5cb42' # yellow
+#  color: '#f5cb42' # yellow
   image: assets/images/geocar.png
 #  background_image: assets/images/geocar.png
 

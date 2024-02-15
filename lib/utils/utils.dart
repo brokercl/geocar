@@ -105,8 +105,8 @@ Future<void> selectDate(BuildContext context, Rx<DateTime> selectedDate,
   final DateTime? pickedDate = await showDatePicker(
     context: context,
     initialDate: selectedDate.value,
-    firstDate: DateTime(1900),
-    lastDate: DateTime(2100),
+    firstDate: firstDate,
+    lastDate: lastDate,
   );
   if (pickedDate != null && pickedDate != selectedDate.value) {
     selectedDate.value = pickedDate;
