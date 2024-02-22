@@ -1,8 +1,14 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:flutter/material.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:geocar/app/modules/geocar/controllers/geocar_controller.dart';
+import 'package:geocar/app/routes/app_pages.dart';
+import 'package:geocar/bottom_nav_controller.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
+
+final bottomNavController = Get.put(BottomNavController());
 
 var locateViewfontZise = 18.0;
 var geoCarViewfontZise = 18.0;
@@ -117,3 +123,121 @@ String formatCurrency(double amount) {
   final formatter = NumberFormat("#,###", "es_CL");
   return formatter.format(amount);
 }
+
+class CustomInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Allow only letters for first 2 positions
+    if (newValue.text.isNotEmpty &&
+        !RegExp(r'[a-zA-Z]').hasMatch(newValue.text[0])) {
+      return oldValue;
+    }
+
+    if (newValue.text.length >= 2 &&
+        !RegExp(r'[a-zA-Z]').hasMatch(newValue.text[1])) {
+      return TextEditingValue(
+        text: newValue.text.substring(0, 1),
+        selection: const TextSelection.collapsed(offset: 1),
+      );
+    }
+
+    // Allow letters and numbers for position 3 to 4
+    if (newValue.text.length >= 3 &&
+        !RegExp(r'[a-zA-Z0-9]').hasMatch(newValue.text[2])) {
+      return TextEditingValue(
+        text: newValue.text.substring(0, 2),
+        selection: const TextSelection.collapsed(offset: 2),
+      );
+    }
+
+    if (newValue.text.length >= 4 &&
+        !RegExp(r'[a-zA-Z0-9]').hasMatch(newValue.text[3])) {
+      return TextEditingValue(
+        text: newValue.text.substring(0, 3),
+        selection: const TextSelection.collapsed(offset: 3),
+      );
+    }
+
+    // Allow only numbers for position 5 to 6
+    if (newValue.text.length >= 5 &&
+        !RegExp(r'[0-9]').hasMatch(newValue.text[4])) {
+      return TextEditingValue(
+        text: newValue.text.substring(0, 4),
+        selection: const TextSelection.collapsed(offset: 4),
+      );
+    }
+
+    if (newValue.text.length >= 6 &&
+        !RegExp(r'[0-9]').hasMatch(newValue.text[5])) {
+      return TextEditingValue(
+        text: newValue.text.substring(0, 5),
+        selection: const TextSelection.collapsed(offset: 5),
+      );
+    }
+
+    return newValue;
+  }
+}
+
+List icons = [
+  ['assets/images/van_on.png', 'assets/images/van_off.png', 'van'],
+  ['assets/images/gps_on.png', 'assets/images/gps_off.png', 'gps'],
+  [
+    'assets/images/calendario_on.png',
+    'assets/images/calendario_off.png',
+    'calendario'
+  ],
+];
+
+// this list work togheter with icons list
+final stateIcons = [true, false, false];
+
+var lastSelected = 0;
+
+var geoCarController = Get.find<GeoCarController>();
+RxInt selectedView = 0.obs;
+
+void changeView(int view) {
+  switch (view) {
+    case 0:
+      Get.toNamed(Routes.geocar);
+      break;
+    case 1:
+      Get.toNamed(Routes.locate);
+      break;
+    case 2:
+      Get.toNamed(Routes.invoice);
+      break;
+  }
+  // selectedView.value = view;
+}
+
+bottomNavBar() => Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(
+        bottomNavController.icons.length,
+        (i) => IconButton(
+          icon: Image.asset(bottomNavController.stateIcons[i]
+              ? bottomNavController.icons[i][0]
+              : bottomNavController.icons[i][1]),
+          onPressed: () {
+            if (geoCarController.isPatenteFormatOk.value) {
+              bottomNavController.stateIcons[bottomNavController.lastSelected] =
+                  false;
+              bottomNavController.stateIcons[i] = true;
+              bottomNavController.lastSelected = i;
+              bottomNavController.changeView(i);
+            } else {
+              if (i > 0) {
+                Get.snackbar(
+                    'Patente No Ingresada', 'por favor ingrese su patente..',
+                    snackPosition: SnackPosition.BOTTOM);
+              }
+            }
+          },
+        ),
+      ),
+    );

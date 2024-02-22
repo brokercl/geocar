@@ -483,6 +483,7 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
       ],
       4.35, // longitud del portico
       setLatLong(-33.4135777, -70.5798551),
+      // TODO cambiar las coordenadas lat, long por las del portico PA7
       // control horarios
       [
         // laboral

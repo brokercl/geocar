@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geocar/app/modules/geocar/controllers/geocar_controller.dart';
-import 'package:geocar/utils/utils.dart';
 import 'package:get/get.dart';
 
 import 'bottom_nav_controller.dart';
@@ -8,37 +7,36 @@ import 'bottom_nav_controller.dart';
 class BottomNavBar extends StatelessWidget {
   final bottomNavController = Get.put(BottomNavController());
   final geoCarController = Get.find<GeoCarController>();
-  final List<IconData> icons = [
-    Icons.bike_scooter,
-    Icons.location_on,
-    Icons.inventory_outlined,
-    Icons.balance,
-  ];
 
   BottomNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      return BottomNavigationBar(
-        items: List.generate(
-          icons.length,
-          (index) => BottomNavigationBarItem(
-            icon: Icon(icons[index],
-                color: bottomNavController.selectedView.value == index
-                    ? geoCarController.isPatenteFormatOk.value
-                        ? selected
-                        : unSelected
-                    : unSelected),
-            label: '',
-          ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(
+        bottomNavController.icons.length,
+        (i) => IconButton(
+          icon: Image.asset(bottomNavController.stateIcons[i]
+              ? bottomNavController.icons[i][0]
+              : bottomNavController.icons[i][1]),
+          onPressed: () {
+            if (geoCarController.isPatenteFormatOk.value) {
+              bottomNavController.stateIcons[bottomNavController.lastSelected] =
+                  false;
+              bottomNavController.stateIcons[i] = true;
+              bottomNavController.lastSelected = i;
+              bottomNavController.changeView(i);
+            } else {
+              if (i > 0) {
+                Get.snackbar(
+                    'Patente No Ingresada', 'por favor ingrese su patente..',
+                    snackPosition: SnackPosition.BOTTOM);
+              }
+            }
+          },
         ),
-        currentIndex: bottomNavController.selectedView.value,
-        onTap: (index) {
-          bottomNavController.changeView(index);
-          // Implement navigation or other actions based on the selected index.
-        },
-      );
-    });
+      ),
+    );
   }
 }

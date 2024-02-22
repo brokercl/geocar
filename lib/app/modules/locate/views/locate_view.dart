@@ -161,10 +161,10 @@ class LocateView extends GetView<LocateController> {
                           ),
                   ),
                 ),
+                BottomNavBar(),
               ],
             ),
           ),
-          bottomNavigationBar: BottomNavBar(),
         ),
       ),
     );

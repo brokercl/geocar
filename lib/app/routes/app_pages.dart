@@ -4,8 +4,6 @@ import '../modules/geocar/bindings/geocar_binding.dart';
 import '../modules/geocar/views/geocar_view.dart';
 import '../modules/invoice/bindings/invoice_binding.dart';
 import '../modules/invoice/views/invoice_view.dart';
-import '../modules/lawyer/bindings/lawyer_binding.dart';
-import '../modules/lawyer/views/lawyer_view.dart';
 import '../modules/locate/bindings/locate_binding.dart';
 import '../modules/locate/views/locate_view.dart';
 
@@ -26,11 +24,6 @@ class AppPages {
       name: _Paths.locate,
       page: () => const LocateView(),
       binding: LocateBinding(),
-    ),
-    GetPage(
-      name: _Paths.lawyer,
-      page: () => const LawyerView(),
-      binding: LawyerBinding(),
     ),
     GetPage(
       name: _Paths.invoice,

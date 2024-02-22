@@ -21,6 +21,9 @@ class InvoiceView extends GetView<InvoiceController> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
+                  onLongPress: () {
+                    // Disable copy-paste functionality
+                  },
                   onPressed: () async => selectDate(context,
                       controller.startDate, DateTime(2024, 1), DateTime.now()),
                   style: ElevatedButton.styleFrom(
@@ -31,6 +34,9 @@ class InvoiceView extends GetView<InvoiceController> {
                       'Start Date \n${DateFormat('dd-MM-yyyy').format(controller.startDate.value)}'),
                 ),
                 ElevatedButton(
+                  onLongPress: () {
+                    // Disable copy-paste functionality
+                  },
                   onPressed: () async {
                     selectDate(context, controller.endDate, DateTime(2024, 1),
                         DateTime.now());
@@ -43,14 +49,34 @@ class InvoiceView extends GetView<InvoiceController> {
                       'End Date \n${DateFormat('dd-MM-yyyy').format(controller.endDate.value)}'),
                 ),
                 ElevatedButton(
+                    onLongPress: () {
+                      // Disable copy-paste functionality
+                    },
                     onPressed: () {
                       print(
                           'controller.startDate ${controller.startDate} controller.endDate ${controller.endDate}');
-                      if (controller.endDate.value
-                          .isBefore(controller.startDate.value)) {
+                      if (DateTime(
+                              controller.endDate.value.year,
+                              controller.endDate.value.month,
+                              controller.endDate.value.day,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0)
+                          .isBefore(DateTime(
+                              controller.startDate.value.year,
+                              controller.startDate.value.month,
+                              controller.startDate.value.day,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0))) {
                         Get.snackbar('Fecha final debe ser >= a fecha inicial',
                             'por favor corrija..',
                             snackPosition: SnackPosition.BOTTOM);
+                        controller.isFilterList.value = false;
                       } else {
                         controller.isFilterList.value = true;
                       }
@@ -59,13 +85,18 @@ class InvoiceView extends GetView<InvoiceController> {
                           controller.startDate.value, controller.endDate.value);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: controller.isFilterList.value
-                          ? const Color.fromARGB(255, 173, 20, 20)
-                          : const Color.fromARGB(
-                              60, 173, 20, 20), // Change the color here
+                      backgroundColor: controller.points.isEmpty
+                          ? const Color.fromARGB(60, 173, 20, 20)
+                          : controller.isFilterList.value
+                              ? const Color.fromARGB(255, 173, 20, 20)
+                              : const Color.fromARGB(
+                                  60, 173, 20, 20), // Change the color here
                     ),
                     child: const Text('Filter \nPoints')),
                 ElevatedButton(
+                  onLongPress: () {
+                    // Disable copy-paste functionality
+                  },
                   onPressed: () {
                     controller.isFilterList.value = false;
                     // Call method to fetch all points
@@ -73,10 +104,12 @@ class InvoiceView extends GetView<InvoiceController> {
                     // Change the color here
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: controller.isFilterList.value
+                    backgroundColor: controller.points.isEmpty
                         ? const Color.fromARGB(60, 26, 147, 15)
-                        : const Color.fromARGB(
-                            255, 26, 147, 15), // Change the color here
+                        : controller.isFilterList.value
+                            ? const Color.fromARGB(60, 26, 147, 15)
+                            : const Color.fromARGB(
+                                255, 26, 147, 15), // Change the color here
                   ),
                   child: const Text('All \nPoints'),
                 ),
@@ -141,9 +174,9 @@ class InvoiceView extends GetView<InvoiceController> {
               ),
             ],
           ),
+          BottomNavBar(),
         ],
       ),
-      bottomNavigationBar: BottomNavBar(),
     );
   }
 }
