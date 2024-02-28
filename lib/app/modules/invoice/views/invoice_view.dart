@@ -165,7 +165,10 @@ class InvoiceView extends GetView<InvoiceController> {
               ),
               InkWell(
                 onTap: () {
-                  controller.sendExcelByEmail('nomExcelFile');
+                  controller.points.isNotEmpty
+                      ? controller.sendExcelByEmail('nomExcelFile')
+                      : Get.snackbar('No porticos que enviar', 'points empty',
+                          snackPosition: SnackPosition.BOTTOM);
                 },
                 child: Image.asset('assets/images/excel_down.png'),
               ),

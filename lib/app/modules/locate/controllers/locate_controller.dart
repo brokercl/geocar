@@ -46,10 +46,17 @@ class LocateController extends GetxController {
 */
 
   // Tarifa = Costo Km * Longitud del portico * factor que es la categoria (index + 1) o sea * 1, * 2 ó * 3
-  final List<double> costoKm = [
+  final List<double> costoKm2023 = [
     92.021, // [0] Tarifa Normal para categoria 1 y 4
     184.042, // [1] Tarifa Punta para categoria 2
     276.063, // [2] Tarifa Saturada para categoria 3 y 5
+  ];
+
+  // Tarifa = Costo Km * Longitud del portico * factor que es la categoria (index + 1) o sea * 1, * 2 ó * 3
+  final List<double> costoKm2024 = [
+    96.434, // [0] Tarifa Normal para categoria 1 y 4
+    192.868, // [1] Tarifa Punta para categoria 2
+    289.302, // [2] Tarifa Saturada para categoria 3 y 5
   ];
 
 /*
@@ -1055,21 +1062,21 @@ y fecha para aplicar o laboral o (Sabado y Festivos) o Domingo
           '${yellow}horario laboral punta ${redConsecionesTagChile[hoja][0][0]} [$hoja][3][1]: ${redConsecionesTagChile[hoja][3][1]}');
       print('');
       for (var fila = redConsecionesTagChileFilaLength;
-          fila < redConsecionesTagChileFilaLength + costoKm.length;
+          fila < redConsecionesTagChileFilaLength + costoKm2024.length;
           fila++) {
         redConsecionesTagChile[hoja].add([
-          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+          double.parse((costoKm2024[fila - redConsecionesTagChileFilaLength] *
                   redConsecionesTagChile[hoja][1] *
                   1) // tarifas para el grupo 1 y 4 para fila = 0
               .toStringAsFixed(2)),
-          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+          double.parse((costoKm2024[fila - redConsecionesTagChileFilaLength] *
                   redConsecionesTagChile[hoja][1] *
                   2 *
                   (redConsecionesTagChile[hoja][3][1].isEmpty
                       ? 0
                       : 1)) //  tarifas para el grupo 2 para fila = 1
               .toStringAsFixed(2)),
-          double.parse((costoKm[fila - redConsecionesTagChileFilaLength] *
+          double.parse((costoKm2024[fila - redConsecionesTagChileFilaLength] *
                   redConsecionesTagChile[hoja][1] *
                   3 *
                   (redConsecionesTagChile[hoja][3][0].isEmpty
