@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geocar/app/modules/invoice/controllers/invoice_controller.dart';
 import 'package:geocar/app/modules/locate/controllers/locate_controller.dart';
-import 'package:geocar/bottom_nav_bar.dart';
 import 'package:geocar/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart'; // Assuming you're using GetX for state management
@@ -165,7 +164,9 @@ class InvoiceView extends GetView<InvoiceController> {
                 ),
               ),
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  controller.sendExcelByEmail('nomExcelFile');
+                },
                 child: Image.asset('assets/images/excel_down.png'),
               ),
               InkWell(
@@ -174,7 +175,7 @@ class InvoiceView extends GetView<InvoiceController> {
               ),
             ],
           ),
-          BottomNavBar(),
+          buildNavBar(),
         ],
       ),
     );

@@ -3,12 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:geocar/app/modules/geocar/controllers/geocar_controller.dart';
 import 'package:geocar/app/routes/app_pages.dart';
-import 'package:geocar/bottom_nav_controller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
-
-final bottomNavController = Get.put(BottomNavController());
 
 var locateViewfontZise = 18.0;
 var geoCarViewfontZise = 18.0;
@@ -17,7 +14,17 @@ double geoCarSizedBox = 10;
 
 appBar(String appBarString) => AppBar(
       automaticallyImplyLeading: false,
-      title: Text(appBarString),
+      title: Obx(() => Row(
+            children: [
+              // alays show image on, no matter the stateIcons
+              Image.asset(
+                stateIcons[0] ? '${icons[0][0]}' : '${icons[0][0]}',
+                scale: 6,
+              ),
+              const Text('    '),
+              Text(appBarString),
+            ],
+          )),
       centerTitle: true,
     );
 
@@ -182,6 +189,7 @@ class CustomInputFormatter extends TextInputFormatter {
   }
 }
 
+final geoCarController = Get.find<GeoCarController>();
 List icons = [
   ['assets/images/van_on.png', 'assets/images/van_off.png', 'van'],
   ['assets/images/gps_on.png', 'assets/images/gps_off.png', 'gps'],
@@ -193,11 +201,10 @@ List icons = [
 ];
 
 // this list work togheter with icons list
-final stateIcons = [true, false, false];
+RxList stateIcons = RxList([true, false, false]);
 
 var lastSelected = 0;
 
-var geoCarController = Get.find<GeoCarController>();
 RxInt selectedView = 0.obs;
 
 void changeView(int view) {
@@ -215,29 +222,34 @@ void changeView(int view) {
   // selectedView.value = view;
 }
 
-bottomNavBar() => Row(
+updateMovilInNavBar(i) {
+  stateIcons[0] = true;
+  icons[0][0] = geoCarController.categoryMovilList[i][1][1];
+  icons[0][1] = geoCarController.categoryMovilList[i][1][2];
+}
+
+buildNavBar() => Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: List.generate(
-        bottomNavController.icons.length,
-        (i) => IconButton(
-          icon: Image.asset(bottomNavController.stateIcons[i]
-              ? bottomNavController.icons[i][0]
-              : bottomNavController.icons[i][1]),
-          onPressed: () {
-            if (geoCarController.isPatenteFormatOk.value) {
-              bottomNavController.stateIcons[bottomNavController.lastSelected] =
-                  false;
-              bottomNavController.stateIcons[i] = true;
-              bottomNavController.lastSelected = i;
-              bottomNavController.changeView(i);
-            } else {
-              if (i > 0) {
-                Get.snackbar(
-                    'Patente No Ingresada', 'por favor ingrese su patente..',
-                    snackPosition: SnackPosition.BOTTOM);
+        icons.length,
+        (i) => Obx(
+          () => IconButton(
+            icon: Image.asset(stateIcons[i] ? icons[i][0] : icons[i][1]),
+            onPressed: () {
+              if (geoCarController.isPatenteFormatOk.value) {
+                stateIcons[lastSelected] = false;
+                stateIcons[i] = true;
+                lastSelected = i;
+                changeView(i);
+              } else {
+                if (i > 0) {
+                  Get.snackbar(
+                      'Patente No Ingresada', 'por favor ingrese su patente..',
+                      snackPosition: SnackPosition.BOTTOM);
+                }
               }
-            }
-          },
+            },
+          ),
         ),
       ),
     );

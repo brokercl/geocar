@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:geocar/app/modules/geocar/controllers/geocar_controller.dart';
-import 'package:geocar/bottom_nav_bar.dart';
 import 'package:geocar/utils/utils.dart';
 
 import 'package:get/get.dart';
@@ -45,6 +44,8 @@ class GeoCarView extends GetView<GeoCarController> {
                             //cambio categoria de movil seleccionada por usuario a true
                             controller.categoryMovilList[i][1][0].value = true;
                             controller.selectedMovilCategory.value = category;
+
+                            updateMovilInNavBar(i);
                           },
                           iconSize: 60,
                         ),
@@ -120,7 +121,7 @@ class GeoCarView extends GetView<GeoCarController> {
                   ],
                 ),
               ),
-              BottomNavBar()
+              buildNavBar(),
             ],
           ),
         ),
